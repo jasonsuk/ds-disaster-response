@@ -17,8 +17,8 @@ def load_data(messages_filepath, categories_filepath):
     '''
 
     # Load as dataframe
-    messages_df = pd.read_csv(messages_filepath)
-    categories_df = pd.read_csv(categories_filepath)
+    messages_df = pd.read_csv(messages_filepath, sep=',')
+    categories_df = pd.read_csv(categories_filepath, sep=',')
 
     # Left merge
 
