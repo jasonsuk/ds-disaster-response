@@ -1,10 +1,10 @@
 # basic modules
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from sklearn.metrics import classification_report, f1_score, confusion_matrix, make_scorer, accuracy_score
-from sklearn.linear_model import LogisticRegression
-from sklearn.multioutput import MultiOutputClassifier
-from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.pipeline import Pipeline
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, f1_score, confusion_matrix, make_scorer, accuracy_score
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 import sys
 import numpy as np
 import pandas as pd
@@ -53,7 +53,7 @@ def build_model():
     # max_iter set to 1000 in case of convergence error
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
-        ('tfidf', TfidfTransformer()),
+        ('tfidf', TfidfTransformer(use_idf=False)),
         ('clf', MultiOutputClassifier(LogisticRegression(C=100, max_iter=1000)))
     ])
 
@@ -72,10 +72,9 @@ def build_model():
 def evaluate_model(model, X_test, Y_test, category_names, expand=False):
 
     import warnings
-    warnings.filters('ignore')
+    warnings.filterwarnings('ignore')
 
     Y_pred = model.predict(X_test)
-    Y_test = np.array(Y_test)
 
     accuracy = accuracy_score(Y_test, Y_pred) * 100
     print(f'Accuracy score: {accuracy:.2f}%', end='\n\n')

@@ -60,6 +60,10 @@ def clean_data(df):
         # Convert column from string to numeric
         categories_expanded[column] = categories_expanded[column].astype(int)
 
+    # Replace integer 2 to 1 for 'related' column
+    categories_expanded['related'] = categories_expanded['related'].apply(
+        lambda x: 1 if x == 2 else x)
+
     # 3. Replace 'categories ' column in df with new category columns
     df = pd.concat([df, categories_expanded], axis=1)
     # Drop the 'categories' column that is no longer necessary
@@ -81,7 +85,7 @@ def clean_data(df):
 # Save cleaned data to a database
 def save_data(df, database_filepath):
     # Use SQLAlchemy library to create a database
-    engine = create_engine(f'sqlite:///{database_filepath}')
+    engine = create_engine(f'sqlite:///+{database_filepath}')
     # save the dataframe as 'messages' table in the database
     df.to_sql('messages', engine, index=False)
 
