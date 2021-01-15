@@ -97,8 +97,8 @@ def build_model():
     # max_iter set to 1000 in case of convergence error
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
-        ('tfidf', TfidfTransformer(use_idf=False)),
-        ('clf', MultiOutputClassifier(LogisticRegression(C=100, max_iter=1000)))
+        ('tfidf', TfidfTransformer()),
+        ('clf', MultiOutputClassifier(LogisticRegression(max_iter=1000)))
     ])
 
     params = {
@@ -113,20 +113,15 @@ def build_model():
     return cv
 
 
-def evaluate_model(model, X_test, Y_test, category_names, expand=False):
+def evaluate_model(model, X_test, Y_test, category_names):
     ''' Custome evaluation tool that returns accuracy score and 
-    classification score for the fitted model
-
+    classification report for the fitted model
 
     Arguments: 
         model: trained classifier model
         X_test: test set predictor variables X
         Y_test: test set target variable Y
         category_names: category names to show to corresponding scores
-        expand: 
-            default set to False to return a summary of micro avg and 
-            weighted avg scores. When expand=True, return the full 
-            classifcation report for each label and aggreates.
 
     Output:
         Accuracy and classificaiton scores for the fitted model
@@ -147,20 +142,9 @@ def evaluate_model(model, X_test, Y_test, category_names, expand=False):
 
     # Print model classificaiton report
     results = classification_report(
-        Y_test, Y_pred, target_names=category_names, output_dict=True)
+        Y_test, Y_pred, target_names=category_names)
 
-    # Covert the reports to dataframe
-    # for easier representation
-    df = pd.DataFrame(results)
-
-    # If expand=True, return the full classification report
-    if expand:
-        print(df)
-
-    # If expand=False, return a summary classification report
-    else:
-        df = pd.DataFrame(results)
-        print(df[['micro avg', 'weighted avg']])
+    print(results)
 
 
 def save_model(model, model_filepath):

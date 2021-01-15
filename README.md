@@ -3,7 +3,7 @@
 ## Table of contents
 
 1. [Project motivation](#motivation)
-2. [Installation](#installation)
+2. [Packages used](#packages)
 3. [File description](#file)
 4. [Deliverables](#deliverables)
 5. [Instructions](#instruction)
@@ -14,13 +14,13 @@
 
 ## Motivation
 
-For this project, I built pipelines that are ready for an API that will classifcy disaster messages into relevant categories.
+For this project, I built data and machine learning pipelines that are ready for a disaster response classifier web API.
 
-The primary purpose of this project is to build ETL-pipeline and ML-pipeline. Therefore the model performance is not the focus.
+The web app will help people to quickly identify which categories that an emergency message falls into and facilitate decision making on follow-up actions during emergency situations.
 
-<a id="installation"></a>
+<a id="packages"></a>
 
-## Installation
+## Packages used
 
 The code here basically run on the Anaconda distribution of Python (version 3.\*).
 
@@ -81,15 +81,15 @@ To run the app,
 
 ## Limitation
 
-Disaster response messages can be classified into 36 categories. However, the given data (csv files) contain imbalanced proporation of values for a majority of features.
+Disaster response messages can be classified into 36 categories. However, a majority of features from the data (csv files) have imbalanced records.
 
-For example, a feature label `child_alone` does not have any data but only 0 values whereas many labels are extremely skewed to 0 binary number (negative) as seen in the figure below.
+For example, a feature label `child_alone` contains little information but only 0 values whereas most of the labels are greatly skewed to 0 binary number (negative) as seen in the figure below.
 
 <img src='skewed.png'>
 
-As a result, while evaluating the model, some labels produce true positive of 0 and f1 score calculation then returns zero division errors as recall and precision equals zero.
+As a result, while evaluating the model, some labels produce true positive of 0 and f1 score calculation then returns zero division errors (as recall and precision equals zero).
 
-Therefore, the model may not be fully trained with the given data sets and require more data to feed in.
+Therefore, the model may not be fully trained with the given data sets and require more training data to fit in.
 
 <a id="acknowledgement"></a>
 
