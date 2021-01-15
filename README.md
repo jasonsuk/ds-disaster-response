@@ -6,8 +6,9 @@
 2. [Installation](#installation)
 3. [File description](#file)
 4. [Deliverables](#deliverables)
-5. [Instruction](#instruction)
-6. [Acknowledgement](#acknowledgement)
+5. [Instructions](#instruction)
+6. [Limitation](#limitation)
+7. [Acknowledgement](#acknowledgement)
 
 <a id="motivation"></a>
 
@@ -76,7 +77,7 @@ To run the app,
 
         http://0.0.0.0:3001
 
-<a id="acknowledgement"></a>
+<a id="limitation"></a>
 
 ## Limitation
 
@@ -89,6 +90,8 @@ For example, a feature label `child_alone` does not have any data but only 0 val
 As a result, while evaluating the model, some labels produce true positive of 0 and f1 score calculation then returns zero division errors as recall and precision equals zero.
 
 Therefore, the model may not be fully trained with the given data sets and require more data to feed in.
+
+<a id="acknowledgement"></a>
 
 ## Acknowledgement
 
