@@ -8,12 +8,15 @@ from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
-    ''' Load the two disaster response datsets and merge them on id
-    categories records without messages are of no use therefore
-    left join will be performed to message data
+    ''' Load the two disaster response datsets to Pandas dataframes 
+    and merge them on id 
 
-    INPUT  : file path to message and category data (in order)
-    OUTPUT : a merged dataframe
+    Arguments  : 
+        messages_filepath : file path to data in message.csv 
+        categories_filpath: file path to data in category.csv 
+
+    Output : 
+        a merged dataframe that contains messages and categories data
     '''
 
     # Load as dataframe
@@ -32,11 +35,14 @@ def load_data(messages_filepath, categories_filepath):
 
 # Clean the merged raw data
 def clean_data(df):
-    ''' Preparing data by key wranling processes identified
+    ''' Preparing data by going through wrangling processes identified
     with the sample data sets. Steps are specified in code blocks
 
-    INPUT  : merged dataframe containing messages and categories raw data
-    OUTPUT : a cleaned dataframe
+    Argument  : 
+        df : merged dataframe containing messages and categories raw data
+
+    Output : 
+        a cleane dataframe
     '''
 
     # 1. Split 'categories' feature into seperate category columns
@@ -84,10 +90,22 @@ def clean_data(df):
 
 # Save cleaned data to a database
 def save_data(df, database_filepath):
+    ''' Save clean dataframe to SQL database.  Save the data in a table 
+    named 'messages' at given database_filepath       
+
+    Arguments: 
+        df: clean dataframe produced by 'clean_data() function' 
+        database_filepath: a path to a directory that saves database 
+
+    Output: 
+        None, database file (.db) at 'database_filepath'
+    '''
+
     # Use SQLAlchemy library to create a database
-    engine = create_engine(f'sqlite:///+{database_filepath}')
+    engine = create_engine(f'sqlite:///{database_filepath}')
     # save the dataframe as 'messages' table in the database
-    df.to_sql('messages', engine, index=False)
+    # If the table exists, replace
+    df.to_sql('messages', engine, index=False, if_exists='replace')
 
 
 def main():

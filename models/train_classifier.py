@@ -22,26 +22,55 @@ nltk.download(['punkt', 'wordnet', 'stopwords'])
 
 
 def load_data(database_filepath):
+    ''' Load database to Pandas dataframe. 
+    Assign predictor and response variables after checking 
+    if child_alone column have values other than 0.
+
+    Argument: 
+        database_filepath : a path to the database
+
+    Output: 
+    predictor variables X, response variable Y, 
+    a list of category names
+    '''
+    # Create engine to connect to 'message' table in the database
     engine = create_engine('sqlite:///'+database_filepath)
     df = pd.read_sql_table('messages', engine)
 
-    df.drop(columns='child_alone', inplace=True)
+    # Check if child_alone column have values other than 0
+    # If not, drop child_alone column
+    if df['child_alone'].sum() == 0:
+        df.drop(columns='child_alone', inplace=True)
 
-    X = df['message']
-    Y = df.iloc[:, 4:]
+    # Assign target and response variables
+    X = df['message']  # disaster response raw message
+    Y = df.iloc[:, 4:]  # categories
 
+    # Create a list of category names
     category_names = Y.columns.values
 
     return X, Y, category_names
 
 
 def tokenize(text):
+    ''' Split text into tokens follwed by preprocessing processes to
+    lowercase the text, remove stopwords and remove puntuations. 
+    Then return lemmatized tokens.
+
+    Arguments:
+        text(string) <-- disaster response message
+    Output : 
+        a list that contains lemmitized tokens
+    '''
+
+    # Tokenize the text
     tokens = [
         word.strip() for word in text.lower()
         if ((word not in stopwords.words('english')) and
             word.isalnum())
     ]
 
+    # Lemmatize the tokenized words
     lemmatizer = WordNetLemmatizer()
     lemmed = [lemmatizer.lemmatize(token) for token in tokens]
 
@@ -49,7 +78,22 @@ def tokenize(text):
 
 
 def build_model():
+    ''' Build a Logistic regressionclassifier model with grid search
+    to fit training data
 
+    Target variable Y (messages) will be reproduced to vectorized data
+    before fitting into the multiclass classification model.
+
+    When fitting the model, grid search will be performed to generate the 
+    best possible parameter evaluated by a customized scorer using micro f1 score.
+
+    Argument: None
+
+    Output: 
+        model that is ready to fit with training data    
+    '''
+
+    # Create a pipeline
     # max_iter set to 1000 in case of convergence error
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
@@ -57,44 +101,81 @@ def build_model():
         ('clf', MultiOutputClassifier(LogisticRegression(C=100, max_iter=1000)))
     ])
 
-    # params = {
-    #     'tfidf__use_idf': (True, False),
-    #     'clf__estimator__C': (1, 100)
-    # }
+    params = {
+        'tfidf__use_idf': (True, False),
+        'clf__estimator__C': (1, 100)
+    }
 
-    # scorer = make_scorer(f1_score, average='micro')
-    # cv = GridSearchCV(pipeline, params, verbose=3,
-    #                   scoring=scorer, n_jobs=1, cv=2)
+    scorer = make_scorer(f1_score, average='micro')
+    cv = GridSearchCV(pipeline, params, verbose=3,
+                      scoring=scorer, n_jobs=1, cv=2)
 
-    return pipeline
+    return cv
 
 
 def evaluate_model(model, X_test, Y_test, category_names, expand=False):
+    ''' Custome evaluation tool that returns accuracy score and 
+    classification score for the fitted model
 
+
+    Arguments: 
+        model: trained classifier model
+        X_test: test set predictor variables X
+        Y_test: test set target variable Y
+        category_names: category names to show to corresponding scores
+        expand: 
+            default set to False to return a summary of micro avg and 
+            weighted avg scores. When expand=True, return the full 
+            classifcation report for each label and aggreates.
+
+    Output:
+        Accuracy and classificaiton scores for the fitted model
+    '''
+
+    # When data is imbalanced, zero-division errors expected
+    # Ignore errors to clearly represent scores
     import warnings
     warnings.filterwarnings('ignore')
 
+    # Run predictions on X_test
     Y_pred = model.predict(X_test)
 
+    # Print model accuracy score
     accuracy = accuracy_score(Y_test, Y_pred) * 100
     print(f'Accuracy score: {accuracy:.2f}%', end='\n\n')
     print(f'Classification score: ')
 
+    # Print model classificaiton report
     results = classification_report(
         Y_test, Y_pred, target_names=category_names, output_dict=True)
 
+    # Covert the reports to dataframe
+    # for easier representation
     df = pd.DataFrame(results)
 
+    # If expand=True, return the full classification report
     if expand:
         print(df)
 
+    # If expand=False, return a summary classification report
     else:
-
         df = pd.DataFrame(results)
         print(df[['micro avg', 'weighted avg']])
 
 
 def save_model(model, model_filepath):
+    ''' Save the trained model to a pickle file (.pkl)
+    Conventionally, pickle file to be saved in 'models' directory
+    as 'classifier_v[version_number].pkl'
+
+    Argument: 
+        model: trained model
+        model_filepath: a path to save the pickle file
+
+    Output:
+        None, a pickle file to be created at the given filepath
+    '''
+
     pickle.dump(model, open(model_filepath, 'wb'))
 
 
